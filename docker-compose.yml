@@ -1,6 +1,5 @@
 services:
   stats-server:
-    build: stats/stats-server
     container_name: stats-server
     ports:
       - "9090:9090"
@@ -21,7 +20,6 @@ services:
 
 
   ewm-service:
-    build: ewm-service
     container_name: ewm-server
     ports:
       - "8080:8080"
