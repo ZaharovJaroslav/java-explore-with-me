@@ -1,0 +1,17 @@
+server :
+  port: 9090
+spring:
+  application.name: stats-server
+  main.banner-mode: OFF
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+  datasource:
+    username: user
+    password: password
+    url: jdbc:postgresql://localhost:5432/ewm-stat
+    driver-class-name: org.postgresql.Driver
