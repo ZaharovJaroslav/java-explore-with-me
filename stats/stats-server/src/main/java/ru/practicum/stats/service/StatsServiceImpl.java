@@ -14,6 +14,7 @@ import ru.practicum.stats.repository.StatsRepository;
 import ru.practicum.stats.validator.CreateStatValidator;
 import ru.practicum.stats.validator.GetStatsValidator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,7 +68,9 @@ public class StatsServiceImpl implements StatsService {
                     .build();
             statForOutput.add(statDto);
         }
-        return statForOutput;
+        return statForOutput.stream()
+                .sorted(Comparator.comparing(StatDto::getHits).reversed())
+                .collect(Collectors.toList());
     }
 
     @Override
