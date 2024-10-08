@@ -32,9 +32,9 @@ public class StatsController {
     @GetMapping("/stats")
     public List<StatDto> getStats(@RequestParam String start,
                                   @RequestParam String end,
-                                  @RequestParam(value = "uris", required = false) String[] uris,
+                                  @RequestParam(value = "uris", required = false) List<String> uris,
                                   @RequestParam(defaultValue = "false") boolean unique) {
     log.debug("Собрать статистику с {} по {}", start, end);
-    return statsService.getStats(start, end,List.of(uris), unique);
+    return statsService.getStats(start, end,uris, unique);
     }
 }

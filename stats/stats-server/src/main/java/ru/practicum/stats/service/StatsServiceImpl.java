@@ -80,7 +80,7 @@ public class StatsServiceImpl implements StatsService {
         }
         List<StatDto> statForOutput;
         List<Stat> stats;
-        if (uris.isEmpty()) {
+        if (uris == null) {
             stats = statsRepository.findStatByForThePeriod(DataTimeMapper.toInstant(startTime),
                     DataTimeMapper.toInstant(endTime));
         } else {
