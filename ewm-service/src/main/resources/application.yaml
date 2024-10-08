@@ -3,15 +3,3 @@ server :
 spring:
   application.name: ewm-service
   main.banner-mode: OFF
-  sql:
-    init:
-      mode: always
-  jpa:
-    hibernate:
-      ddl-auto: none
-    show-sql: true
-  datasource:
-    username: user
-    password: password
-    url: jdbc:postgresql://localhost:7070/ewm-db
-    driver-class-name: org.postgresql.Driver

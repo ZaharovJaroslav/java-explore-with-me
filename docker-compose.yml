@@ -18,3 +18,8 @@ services:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
       - POSTGRES_DB=postgres
+
+  ewm-service:
+    build: ./ewm-service
+    ports:
+      - "8080:8080"
