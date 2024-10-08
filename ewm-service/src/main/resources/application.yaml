@@ -1,7 +1,7 @@
 server :
-  port: 9090
+  port: 8080
 spring:
-  application.name: stats-server
+  application.name: ewm-service
   main.banner-mode: OFF
   sql:
     init:
@@ -13,5 +13,5 @@ spring:
   datasource:
     username: user
     password: password
-    url: jdbc:postgresql://localhost:5432/ewm-stats
+    url: jdbc:postgresql://localhost:7070/ewm-db
     driver-class-name: org.postgresql.Driver
