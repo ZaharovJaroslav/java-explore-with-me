@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Repository
-public interface StatsRepository extends JpaRepository<Stat,Long> {
+public interface StatsRepository extends JpaRepository<Stat, Long> {
 
     @Query("SELECT s FROM Stat s "
             + "WHERE s.uri IN (:uris) "

@@ -3,3 +3,18 @@ server :
 spring:
   application.name: ewm-service
   main.banner-mode: OFF
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+  datasource:
+    username: user
+    password: password
+    url: jdbc:h2:file:./db/ewm-service
+    driver-class-name: org.h2.Driver
