@@ -1,10 +1,8 @@
-package ru.practicum.ewm.user.validator;
-
-import ru.practicum.ewm.user.model.Validator;
+package ru.practicum.ewm.validator;
 
 import java.util.ArrayList;
 
-abstract class AbstractValidator {
+public abstract class AbstractValidator {
     protected Validator validateResult;
 
     public AbstractValidator() {
@@ -19,5 +17,5 @@ abstract class AbstractValidator {
         return validateResult.isValid();
     }
 
-    abstract void validate();
+    protected abstract void validate();
 }

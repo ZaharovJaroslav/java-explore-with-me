@@ -1,4 +1,4 @@
-package ru.practicum.ewm.user.model;
+package ru.practicum.ewm.validator;
 
 import lombok.Getter;
 import java.util.ArrayList;

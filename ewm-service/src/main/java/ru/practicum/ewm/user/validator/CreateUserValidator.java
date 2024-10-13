@@ -2,6 +2,7 @@ package ru.practicum.ewm.user.validator;
 
 import lombok.extern.slf4j.Slf4j;
 import ru.practicum.ewm.user.dto.NewUserRequest;
+import ru.practicum.ewm.validator.AbstractValidator;
 
 @Slf4j
 public class CreateUserValidator extends AbstractValidator {
