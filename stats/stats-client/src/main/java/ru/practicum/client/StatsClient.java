@@ -2,6 +2,8 @@ package ru.practicum.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,25 +13,32 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.ParamHitDto;
 import ru.practicum.dto.StatDto;
+
 import java.util.List;
 import java.util.Map;
 
 @Slf4j
-
 @Component
 @RequiredArgsConstructor
 
 public class StatsClient {
-    static final String STATS_SERVER = "${stats-server.url}";
-    //static final String STATS_SERVER = "http://localhost:9090";
-
+    String statsServer;
     private final RestTemplate restTemplate;
+
+    @Autowired
+    public StatsClient(@Value("${stats-" +
+            "server.url}") String statsServer, RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+        this.statsServer = statsServer;
+    }
+
+
 
     public void save(ParamHitDto newStat) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<ParamHitDto> requestEntity = new HttpEntity<>(newStat,httpHeaders);
-        restTemplate.exchange(STATS_SERVER + "/hit", HttpMethod.POST, requestEntity, ParamHitDto.class);
+        restTemplate.exchange(statsServer + "/hit", HttpMethod.POST, requestEntity, ParamHitDto.class);
     }
 
     public List<StatDto> getStats(String start, String end, List<String> uris, boolean unique) {
@@ -43,7 +52,7 @@ public class StatsClient {
                 "uris", uris,
                 "unique", unique);
 
-        String uri = STATS_SERVER + "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
+        String uri = statsServer + "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
         return restTemplate.exchange(uri, HttpMethod.GET, requestEntity,
                 new ParameterizedTypeReference<List<StatDto>>() {
                 },
