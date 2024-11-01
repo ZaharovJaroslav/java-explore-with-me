@@ -18,7 +18,7 @@ services:
     environment:
       - POSTGRES_PASSWORD=password
       - POSTGRES_USER=user
-      - POSTGRES_DB=postgres
+      - POSTGRES_DB=postgres1
 
   ewm-service:
     container_name: ewm-service
