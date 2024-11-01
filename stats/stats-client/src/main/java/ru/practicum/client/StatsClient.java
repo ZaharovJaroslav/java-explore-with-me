@@ -2,8 +2,6 @@ package ru.practicum.client;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -22,15 +20,11 @@ import java.util.Map;
 @RequiredArgsConstructor
 
 public class StatsClient {
-    String statsServer;
+
+    String statsServer = "http://stats-service:9090";
     private final RestTemplate restTemplate;
 
-    @Autowired
-    public StatsClient(@Value("${stats-" +
-            "server.url}") String statsServer, RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-        this.statsServer = statsServer;
-    }
+
 
 
 
