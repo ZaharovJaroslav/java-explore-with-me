@@ -16,13 +16,13 @@ import lombok.RequiredArgsConstructor;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "email", nullable = false, unique = true)
-    String email;
+    private String email;
 
     @Column(name = "name", nullable = false)
-    String name;
+    private String name;
 
     public User(String email, String name) {
         this.email = email;

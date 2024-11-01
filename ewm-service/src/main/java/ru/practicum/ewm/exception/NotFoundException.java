@@ -1,11 +1,12 @@
 package ru.practicum.ewm.exception;
 
+import java.util.ArrayList;
+
 public class NotFoundException extends RuntimeException {
+    private final ArrayList<String> errors;
+
     public NotFoundException(String message) {
         super(message);
-    }
-
-    public NotFoundException(String message, Throwable cause) {
-        super(message, cause);
+        this.errors = new ArrayList<>();
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.ewm.user.dto.NewUserRequest;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.service.UserService;
-
 import java.util.List;
 
 @Slf4j
@@ -34,8 +33,8 @@ public class UserController {
 
     @GetMapping
     public List<UserDto> getUsers(@RequestParam(value = "ids", required = false) List<Integer> ids,
-                                  @RequestParam(value = "from", defaultValue = "0") int from,
-                                  @RequestParam(value = "size", defaultValue = "10") int size) {
+                                  @RequestParam(value = "from", required = false, defaultValue = "0") int from,
+                                  @RequestParam(value = "size",required = false, defaultValue = "10") int size) {
         log.info("Запрос списка пользовательей по параметрам: {}, {}, {}", ids, from, size);
        return userService.getUsers(ids, from, size);
     }

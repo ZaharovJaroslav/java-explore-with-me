@@ -6,6 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.NewCategoryRequest;
 import ru.practicum.ewm.category.mapper.CategoryMapper;
@@ -13,32 +14,36 @@ import ru.practicum.ewm.category.model.Category;
 import ru.practicum.ewm.category.repository.CategoryRepository;
 import ru.practicum.ewm.category.validator.CreateCategoryValidator;
 import ru.practicum.ewm.category.validator.GetCategoryValidator;
+import ru.practicum.ewm.event.repository.event.EventRepository;
 import ru.practicum.ewm.exception.ConflictException;
 import ru.practicum.ewm.exception.NotFoundException;
 import ru.practicum.ewm.exception.ValidationException;
-
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
-    public CategoryDto addCategory(NewCategoryRequest request) {
-        log.debug("addCategory({})", request);
-        CreateCategoryValidator validator = new CreateCategoryValidator(request);
+    public CategoryDto addCategory(NewCategoryRequest newCategoryRequest) {
+        log.debug("addCategory({})", newCategoryRequest);
+        CreateCategoryValidator validator = new CreateCategoryValidator(newCategoryRequest);
         validator.validate();
         if (!validator.isValid()) {
             throw new ValidationException("Запрос составлен некорректно", validator.getMessages());
         }
-        Category category = new Category(request.getName());
-        try {
+        getCategoryByName(newCategoryRequest.getName());
+        Category category = new Category(newCategoryRequest.getName());
         return CategoryMapper.toCategoryDto(categoryRepository.save(category));
-        } catch (Exception e) {
-            throw new ConflictException(e.getMessage(), new ConflictException("Нарушение целостности данных"));
+    }
+
+    public void getCategoryByName(String name) {
+        log.info("Запрос на получение категории по названию");
+        if (categoryRepository.findCategoryByName(name).isPresent()) {
+            throw new ConflictException("Категория " + name + " уже существует");
         }
     }
 
@@ -50,26 +55,28 @@ public class CategoryServiceImpl implements CategoryService {
         if (!validator.isValid()) {
             throw new ValidationException("Запрос составлен некорректно", validator.getMessages());
         }
-        if (categoryRepository.findById(categoryId).isEmpty()) {
-            throw new NotFoundException("Нужный обьект не найден:",
-                    new NotFoundException("Категория с id = " + categoryId + "не найдена"));
+        Category category =  categoryRepository.findById(categoryId).orElseThrow(() ->
+                new NotFoundException("\"Категория с id = \" + categoryId + \"не найдена\""));
+        if (category.getName().equals(newCategory.getName())) {
+            categoryRepository.save(category);
+        } else {
+            getCategoryByName(newCategory.getName());
+            category.setName(newCategory.getName());
+            categoryRepository.save(category);
         }
-        Category udateCategory = new Category(categoryId,newCategory.getName());
-        try {
-            return CategoryMapper.toCategoryDto(categoryRepository.save(udateCategory));
-        } catch (Exception e) {
-        throw new ConflictException(e.getMessage(), new ConflictException("Нарушение целостности данных"));
-    }
+        return CategoryMapper.toCategoryDto(categoryRepository.save(category));
     }
 
     @Override
+    @Transactional
     public void deleteCategoryById(Long categoryId) {
         log.debug("deleteCategoryById({})", categoryId);
-        if (categoryRepository.findById(categoryId).isPresent()) {
-            categoryRepository.deleteById(categoryId);
-        } else
-            throw new NotFoundException("Нужный обьект не найден:",
-                    new NotFoundException("Категория с id = " + categoryId + "не найдена"));
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Подборка с id = " + categoryId + "не найден"));
+        if (!eventRepository.findEventsByCategoryId(categoryId).isEmpty()) {
+            throw new ConflictException("Нельзя удалить категорию так как в нем содержаться события");
+        }
+        categoryRepository.deleteById(categoryId);;
     }
 
     @Override
@@ -86,12 +93,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getCategoryById(Long categoryId) {
         log.debug("getCategoryById({})", categoryId);
-        Optional<Category> category =  categoryRepository.findById(categoryId);
-        if (category.isPresent()) {
-            return CategoryMapper.toCategoryDto(category.get());
-        } else {
-            throw new NotFoundException("Нужный обьект не найден:",
-                    new NotFoundException("Категория с id = " + categoryId + "не найдена"));
-        }
+        Category category =  categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Подборка с id = " + categoryId + "не найден"));
+        return CategoryMapper.toCategoryDto(category);
     }
 }

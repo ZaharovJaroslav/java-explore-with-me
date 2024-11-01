@@ -2,7 +2,6 @@ package ru.practicum.ewm.category.service;
 
 import ru.practicum.ewm.category.dto.CategoryDto;
 import ru.practicum.ewm.category.dto.NewCategoryRequest;
-
 import java.util.List;
 
 public interface CategoryService {
@@ -15,5 +14,4 @@ public interface CategoryService {
     List<CategoryDto> getCategories(int from, int size);
 
     CategoryDto getCategoryById(Long id);
-
 }

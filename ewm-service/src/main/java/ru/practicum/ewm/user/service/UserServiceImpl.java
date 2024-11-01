@@ -25,28 +25,31 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDto addUser(NewUserRequest request) {
-        log.debug("addUser({})", request);
-        CreateUserValidator validator = new CreateUserValidator(request);
+    public UserDto addUser(NewUserRequest newUserRequest) {
+        log.debug("addUser({})", newUserRequest);
+        CreateUserValidator validator = new CreateUserValidator(newUserRequest);
         validator.validate();
         if (!validator.isValid()) {
             throw new ValidationException("Запрос составлен некорректно", validator.getMessages());
         }
-        User user = new User(request.getEmail(),
-                             request.getName());
-        try {
-            return UserMapper.touserDto(userRepository.save(user));
-        } catch (Exception e) {
-            throw new ConflictException(e.getMessage(), new ConflictException("Нарушение целостности данных"));
+        getUserByEmail(newUserRequest.getEmail());
+        User user = new User(newUserRequest.getEmail(), newUserRequest.getName());
+        return UserMapper.touserDto(userRepository.save(user));
+    }
+
+    public void getUserByEmail(String email) {
+        log.info("Запрос на получение Пользователя по Email");
+        if (userRepository.findUserByEmail(email).isPresent()) {
+           throw new ConflictException("Пользователь с email - " + email + " уже существует");
         }
     }
 
     @Override
     public List<UserDto> getUsers(List<Integer> ids, int from, int size) {
-        log.debug("getUsers({}, {}, {})", ids, from ,size);
+        log.debug("getUsers({}, {}, {})", ids, from, size);
         Pageable pageable =  PageRequest.of(from, size, Sort.by("id").ascending());
         List<User> users;
-        if (!ids.isEmpty()) {
+        if (ids != null) {
             log.info("Получение пользователей по списку id");
             users = userRepository.findAllByIdIn(ids, pageable).getContent();
         } else {
@@ -62,7 +65,13 @@ public class UserServiceImpl implements UserService {
        if (userRepository.findById(userId).isPresent()) {
            userRepository.deleteById(userId);
        } else
-           throw new NotFoundException("Нужный обьект не найден:",
-                                       new NotFoundException("Пользователь с id = " + userId + "не найден"));
+             throw new NotFoundException("Пользователь с id = " + userId + "не найден");
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        log.info("Запрос на получение пользователя из Базы данных по id = {}", userId);
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + "не найден"));
     }
 }

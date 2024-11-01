@@ -7,7 +7,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import ru.practicum.dto.ParamHitDto;
@@ -16,10 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 @Slf4j
-@RequiredArgsConstructor
+
 @Component
+@RequiredArgsConstructor
+
 public class StatsClient {
     static final String STATS_SERVER = "${stats-server.url}";
+    //static final String STATS_SERVER = "http://localhost:9090";
+
     private final RestTemplate restTemplate;
 
     public void save(ParamHitDto newStat) {
@@ -29,7 +32,7 @@ public class StatsClient {
         restTemplate.exchange(STATS_SERVER + "/hit", HttpMethod.POST, requestEntity, ParamHitDto.class);
     }
 
-    public ResponseEntity<List<StatDto>> getStats(String start, String end, String[]uris, boolean unique) {
+    public List<StatDto> getStats(String start, String end, List<String> uris, boolean unique) {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<?> requestEntity = new HttpEntity<>(httpHeaders);
@@ -41,10 +44,9 @@ public class StatsClient {
                 "unique", unique);
 
         String uri = STATS_SERVER + "/stats?start={start}&end={end}&uris={uris}&unique={unique}";
-
         return restTemplate.exchange(uri, HttpMethod.GET, requestEntity,
                 new ParameterizedTypeReference<List<StatDto>>() {
                 },
-                uriVariables);
+                uriVariables).getBody();
     }
 }

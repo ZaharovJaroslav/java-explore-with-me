@@ -6,7 +6,6 @@ import java.util.List;
 
 @Slf4j
 public class GetCategoryValidator extends AbstractValidator {
-
     protected final List<Integer> requestParam;
 
     public GetCategoryValidator(List<Integer> requestParam) {
@@ -14,9 +13,9 @@ public class GetCategoryValidator extends AbstractValidator {
     }
 
     public void validate() {
-        log.debug("validate({})",requestParam);
-        for (Integer param :requestParam) {
-            if (param < 0 ) {
+        log.debug("validate({})", requestParam);
+        for (Integer param : requestParam) {
+            if (param < 0) {
                 log.error("Значение не может содержать отрицательное число, Переданное значение: {}", requestParam);
                 validateResult.add("Значение не может содержать отрицательное число Переданное значение: " + requestParam);
             }

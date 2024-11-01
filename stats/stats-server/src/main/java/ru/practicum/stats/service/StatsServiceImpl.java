@@ -87,12 +87,12 @@ public class StatsServiceImpl implements StatsService {
             stats = statsRepository.findStatByForThePeriod(DataTimeMapper.toInstant(startTime),
                     DataTimeMapper.toInstant(endTime));
         } else {
+            List<String> urisUpdate = uris.stream().map(uri -> uri.substring(1, uri.length() - 1)).toList();
             stats = statsRepository.findStatByUriForThePeriod(DataTimeMapper.toInstant(startTime),
                     DataTimeMapper.toInstant(endTime),
-                    uris);
+                    urisUpdate);
         }
         statForOutput = groupStatByLinkAndIp(stats, unique);
-
         return statForOutput;
     }
 }
