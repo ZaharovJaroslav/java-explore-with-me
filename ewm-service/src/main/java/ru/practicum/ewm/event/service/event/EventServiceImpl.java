@@ -248,7 +248,7 @@ public class EventServiceImpl implements EventService {
                         participationRequest -> participationRequest.getEvent().getId()));
         for (Long id : requests.values()) {
             for (Event ev : events) {
-                if (ev.getId() == id) {
+                if (ev.getId().equals(id)) {
                     ev.setConfirmedRequests(+1L);
                 }
             }
