@@ -3,3 +3,26 @@ server :
 spring:
   application.name: ewm-service
   main.banner-mode: OFF
+  sql:
+    init:
+      mode: always
+  jpa:
+    hibernate:
+
+      ddl-auto: none
+    show-sql: true
+  datasource:
+    username: postgres
+    password: iamroot
+    url: jdbc:postgresql://localhost:6541/postgres2
+    driver-class-name: org.postgresql.Driver
+
+
+
+
+    logging:
+      level:
+        org.springframework.orm:
+          jpa: INFO
+          transactiont: INFO
+          JpaTransactionManager: DEBUG

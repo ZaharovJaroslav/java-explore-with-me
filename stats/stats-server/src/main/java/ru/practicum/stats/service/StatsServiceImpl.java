@@ -1,18 +1,20 @@
 package ru.practicum.stats.service;
 
-import ru.practicum.dto.ParamDto;
-import ru.practicum.dto.ParamHitDto;
-import ru.practicum.dto.StatDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.stats.mapper.DataTimeMapper;
+import ru.practicum.dto.ParamDto;
+import ru.practicum.dto.ParamHitDto;
+import ru.practicum.dto.StatDto;
 import ru.practicum.stats.exception.ValidationException;
 import ru.practicum.stats.model.Stat;
 import ru.practicum.stats.repository.StatsRepository;
 import ru.practicum.stats.validator.CreateStatValidator;
 import ru.practicum.stats.validator.GetStatsValidator;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -39,7 +41,7 @@ public class StatsServiceImpl implements StatsService {
                 .app(newStat.getApp())
                 .uri(newStat.getUri())
                 .ip(newStat.getIp())
-                .timestamp(DataTimeMapper.toInstant(newStat.getTimestamp()))
+                .timestamp(newStat.getTimestamp())
                 .build();
         statsRepository.save(stat);
     }
@@ -84,15 +86,19 @@ public class StatsServiceImpl implements StatsService {
         List<StatDto> statForOutput;
         List<Stat> stats;
         if (uris == null) {
-            stats = statsRepository.findStatByForThePeriod(DataTimeMapper.toInstant(startTime),
-                    DataTimeMapper.toInstant(endTime));
+            stats = statsRepository.findStatByForThePeriod(parseTime(startTime),
+                    parseTime(endTime));
         } else {
-            stats = statsRepository.findStatByUriForThePeriod(DataTimeMapper.toInstant(startTime),
-                    DataTimeMapper.toInstant(endTime),
-                    uris);
+            List<String> urisUpdate = uris.stream().map(uri -> uri.substring(1, uri.length() - 1)).toList();
+            stats = statsRepository.findStatByUriForThePeriod(parseTime(startTime),
+                    parseTime(endTime),
+                    urisUpdate);
         }
         statForOutput = groupStatByLinkAndIp(stats, unique);
-
         return statForOutput;
+    }
+
+    private LocalDateTime parseTime(String time) {
+            return LocalDateTime.parse(time, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 }

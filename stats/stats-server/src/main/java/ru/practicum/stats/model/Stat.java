@@ -10,7 +10,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.Instant;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "stats")
@@ -33,6 +34,6 @@ public class Stat {
     private String ip;
 
     @Column(name = "timestamp", nullable = false)
-    private Instant timestamp;
+    private LocalDateTime timestamp;
 }
 
