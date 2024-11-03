@@ -20,8 +20,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class StatsClient {
 
-   // String statsServer = "http://stats-service:9090";
-    String statsServer = "http://localhost:9090";
+    String statsServer = "http://stats-service:9090";
+    //String statsServer = "http://localhost:9090";
     private final RestTemplate restTemplate;
 
 
