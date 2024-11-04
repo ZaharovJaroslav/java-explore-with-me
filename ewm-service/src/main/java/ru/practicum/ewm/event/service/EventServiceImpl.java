@@ -248,12 +248,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getEventsPublic(EventUserParam eventUserParam, HttpServletRequest request) {
-        ParamHitDto statsDto = new ParamHitDto();
-        statsDto.setIp(request.getRemoteAddr());
-        statsDto.setUri(request.getRequestURI());
-        statsDto.setApp("ewm-main-service");
-        statsDto.setTimestamp(LocalDateTime.now());
-        client.save(statsDto);
+        ParamHitDto paramHitDto = new ParamHitDto();
+        paramHitDto.setIp(request.getRemoteAddr());
+        paramHitDto.setUri(request.getRequestURI());
+        paramHitDto.setApp("ewm-main-service");
+        paramHitDto.setTimestamp(LocalDateTime.now());
+        client.save(paramHitDto);
 
         Specification<Event> specification = (((root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();

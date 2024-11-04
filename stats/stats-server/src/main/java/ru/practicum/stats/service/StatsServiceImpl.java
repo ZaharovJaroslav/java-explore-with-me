@@ -78,6 +78,7 @@ public class StatsServiceImpl implements StatsService {
     @Override
     public List<StatDto> getStats(String startTime, String endTime, List<String> uris, boolean unique) {
         log.debug("getStats({},{},{},{})", startTime, endTime, uris,unique);
+        List<String> urisList = new ArrayList<>();
         GetStatsValidator validator = new GetStatsValidator(new ParamDto(startTime,endTime));
         validator.validate();
         if (!validator.isValid()) {
@@ -93,10 +94,15 @@ public class StatsServiceImpl implements StatsService {
             stats = statsRepository.findStatByForThePeriod(parseTime(startTime),
                     parseTime(endTime));
         } else {
-         //   List<String> urisUpdate = uris.stream().map(uri -> uri.substring(1, uri.length() - 1)).toList();
+            for (String uri : uris) {
+                if (uri.startsWith("[")) {
+                    urisList.add(uri.substring(1, uri.length() - 1));
+                } else
+                    urisList.add(uri);
+            }
             stats = statsRepository.findStatByUriForThePeriod(parseTime(startTime),
                     parseTime(endTime),
-                    uris);
+                    urisList);
         }
         statForOutput = groupStatByLinkAndIp(stats, unique);
         return statForOutput;
