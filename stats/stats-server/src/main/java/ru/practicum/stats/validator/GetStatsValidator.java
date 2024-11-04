@@ -23,4 +23,5 @@ public class GetStatsValidator extends AbstractValidator {
             validateResult.add("Не указано Дата и время начала диапазона за который нужно выгрузить статистику");
         }
     }
+
 }

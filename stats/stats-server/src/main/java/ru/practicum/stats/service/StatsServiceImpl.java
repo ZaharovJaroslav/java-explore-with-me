@@ -83,16 +83,20 @@ public class StatsServiceImpl implements StatsService {
         if (!validator.isValid()) {
             throw new ValidationException("Невалидные параметры", validator.getMessages());
         }
+
+        if (parseTime(startTime).isAfter(parseTime(endTime))) {
+            throw new ValidationException("Время начала должно быть раньше окончания");
+        }
         List<StatDto> statForOutput;
         List<Stat> stats;
         if (uris == null) {
             stats = statsRepository.findStatByForThePeriod(parseTime(startTime),
                     parseTime(endTime));
         } else {
-            List<String> urisUpdate = uris.stream().map(uri -> uri.substring(1, uri.length() - 1)).toList();
+         //   List<String> urisUpdate = uris.stream().map(uri -> uri.substring(1, uri.length() - 1)).toList();
             stats = statsRepository.findStatByUriForThePeriod(parseTime(startTime),
                     parseTime(endTime),
-                    urisUpdate);
+                    uris);
         }
         statForOutput = groupStatByLinkAndIp(stats, unique);
         return statForOutput;
