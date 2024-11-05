@@ -6,11 +6,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.exception.ObjectAlreadyExistException;
 import ru.practicum.ewm.exception.ObjectNotFoundException;
+import ru.practicum.ewm.exception.RulesViolationException;
+import ru.practicum.ewm.subscription.dto.UserWithSubscribers;
+import ru.practicum.ewm.subscription.model.Subscription;
+import ru.practicum.ewm.subscription.repository.SubscriptionRepository;
 import ru.practicum.ewm.user.dto.NewUserRequest;
 import ru.practicum.ewm.user.dto.UserDto;
 import ru.practicum.ewm.user.mapper.UserMapper;
+import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final SubscriptionRepository subscriptionRepository;
 
     @Override
     public UserDto addUserAdmin(NewUserRequest newUserRequest) {
@@ -51,5 +59,52 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.deleteById(id);
         log.info("Delete user by ID: {}", id);
+    }
+
+    @Override
+    @Transactional
+    public UserWithSubscribers addSubscriber(Long userId, Long authorId) {
+        if (userId.equals(authorId)) {
+            throw new RulesViolationException("The user cannot subscribe to himself");
+        }
+        User user = getUserOrThrow(userId);
+        User author = getUserOrThrow(authorId);
+        if (subscriptionRepository.existsBySubscriberAndSubscribedTo(user, author)) {
+            throw new RulesViolationException("You subscribe on this user");
+        }
+        Subscription subscription = new Subscription();
+        subscription.setSubscriber(user);
+        subscription.setSubscribedTo(author);
+        subscriptionRepository.save(subscription);
+        log.info("User with id={} subscribed on user with id={}", userId, authorId);
+        return userMapper.toUserDtoWithSubscribers(user, Collections.singletonList(author));
+    }
+
+    @Override
+    @Transactional
+    public void deleteSubscriber(Long userId, Long authorId) {
+        if (userId.equals(authorId)) {
+            throw new RulesViolationException("User can't unsubscribe yourself");
+        }
+        Subscription subscription = subscriptionRepository.findBySubscriberIdAndSubscribedToId(userId, authorId);
+        if (subscription == null) {
+            throw new ObjectNotFoundException("Subscription not found");
+        }
+        subscriptionRepository.delete(subscription);
+        log.info("User with id={} unsubscribed from user with id={}", userId, authorId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserWithSubscribers getUserWithSubscribers(Long userId, Pageable pageable) {
+        User user = getUserOrThrow(userId);
+        List<Subscription> subscriptions = subscriptionRepository.findBySubscriberId(userId, pageable);
+        List<User> subscribers = subscriptions.stream().map(Subscription::getSubscribedTo).collect(Collectors.toList());
+        return userMapper.toUserDtoWithSubscribers(user, subscribers);
+    }
+
+    private User getUserOrThrow(long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> new ObjectNotFoundException(String.format("User with id=%d not found", userId)));
     }
 }
