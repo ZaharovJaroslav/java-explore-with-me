@@ -25,7 +25,7 @@ public class CreateStatValidator extends AbstractValidator {
             log.error("Не указан IP-адрес пользователя, осуществившего запрос");
             validateResult.add("Не указан IP-адрес пользователя, осуществившего запрос");
         }
-        if (request.getTimestamp() == null || request.getTimestamp().isBlank()) {
+        if (request.getTimestamp() == null) {
             log.error("Не указано Дата и время, когда был совершен запрос к эндпоинту");
             validateResult.add("Не указано Дата и время, когда был совершен запрос к эндпоинту");
         }
