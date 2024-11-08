@@ -37,6 +37,8 @@ import ru.practicum.ewm.request.mapper.RequestMapper;
 import ru.practicum.ewm.request.model.Request;
 import ru.practicum.ewm.request.model.RequestStatus;
 import ru.practicum.ewm.request.repository.RequestRepository;
+import ru.practicum.ewm.subscription.model.Subscription;
+import ru.practicum.ewm.subscription.repository.SubscriptionRepository;
 import ru.practicum.ewm.user.model.User;
 import ru.practicum.ewm.user.repository.UserRepository;
 
@@ -45,6 +47,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.constant.Constants.DATE_FORMAT;
@@ -62,6 +65,8 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final RequestMapper requestMapper;
     private final StatsClient client;
+    private final SubscriptionRepository subscriptionRepository;
+
 
     @Override
     @Transactional
@@ -443,5 +448,37 @@ public class EventServiceImpl implements EventService {
             view = output.get(0).getHits();
         }
         return view;
+    }
+
+    @Override
+    public List<EventFullDto> findEventsByUser(Long userId, Long authorId, Pageable pageable) {
+        if (Objects.equals(userId, authorId)) {
+            throw new RulesViolationException("User can't be subscribe to himself");
+        }
+        Subscription subscription = subscriptionRepository.findBySubscriberIdAndSubscribedToId(userId, authorId);
+        if (subscription == null) {
+            throw new ObjectNotFoundException("Subscribe not found");
+        }
+        List<Event> events = eventRepository.findByInitiatorIdAndState(authorId, EventState.PUBLISHED, pageable);
+        log.info("Events found for user with id={} from subscriber with id={}", userId, authorId);
+        return events.stream().map(e -> eventMapper.toFull(e, getHitsEvent(e.getId(),
+                        LocalDateTime.now().minusDays(100).format(DateTimeFormatter.ofPattern(DATE_FORMAT)),
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT)), false)))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EventShortDto> findEventsByAllUsers(Long userId, Pageable pageable) {
+        List<Subscription> subscriptions = subscriptionRepository.findBySubscriberId(userId, pageable);
+        List<Long> usersIds = subscriptions.stream().map(subscription -> subscription.getSubscribedTo().getId()).collect(Collectors.toList());
+        if (usersIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        List<Event> events = eventRepository.findByStateAndInitiatorIdIn(EventState.PUBLISHED, usersIds, pageable);
+        log.info("Найдены все события от пользователей для подписчика с id={}", userId);
+        return events.stream().map(e -> eventMapper.toShort(e, getHitsEvent(e.getId(),
+                        LocalDateTime.now().minusDays(100).format(DateTimeFormatter.ofPattern(DATE_FORMAT)),
+                        LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT)), false)))
+                .collect(Collectors.toList());
     }
 }

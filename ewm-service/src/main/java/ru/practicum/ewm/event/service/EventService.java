@@ -36,6 +36,11 @@ public interface EventService {
 
     List<ParticipationRequestDto> getRequestsUserToEventPrivate(Long userId, Long eventId);
 
-    EventRequestStatusUpdateResult updateEventRequestStatusPrivate(Long userId, Long eventId, EventRequestStatusUpdateRequest updateRequests);
+    EventRequestStatusUpdateResult updateEventRequestStatusPrivate(Long userId, Long eventId,
+                                                                   EventRequestStatusUpdateRequest updateRequests);
+
+    List<EventFullDto> findEventsByUser(Long userId, Long authorId, Pageable pageable);
+
+    List<EventShortDto> findEventsByAllUsers(Long userId, Pageable pageable);
 
 }

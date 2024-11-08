@@ -19,9 +19,7 @@ import java.util.Map;
 @Component
 @RequiredArgsConstructor
 public class StatsClient {
-
     String statsServer = "http://stats-server:9090";
-   // String statsServer = "http://localhost:9090";
     private final RestTemplate restTemplate;
 
 
